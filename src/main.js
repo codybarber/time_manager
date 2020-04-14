@@ -2,19 +2,26 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import VueIdb from 'vue-idb'
-import iView from 'iview';
-import 'iview/dist/styles/iview.css';
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
+library.add(faUserSecret)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(VueIdb)
-Vue.use(iView)
+Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 
 const idb = new VueIdb({
   version: 1,
-  database: 'worktime',
+  database: 'hmdb',
   schemas: [
     { clients: 'id, name' },
-    { projects: 'id, client_name, job_code' },
-    { entries: 'id, time_spent, date, note, client, project_name, project_job_code, submitted, reminder' }
+    { projects: 'id, name, client, job_code' },
+    { entries: 'id, time_spent, date, note, client, project, submitted, reminder' }
   ]
 })
 

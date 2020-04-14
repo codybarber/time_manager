@@ -1,0 +1,175 @@
+/* eslint-disable */
+<template>
+  <div class="container-fluid">
+    <b-row class="sub-header-row">
+      <b-col lg="10">
+        <span class="sub-header">{{ projects.filter(project => project.id == $route.params.id)[0].name }}</span>
+      </b-col>
+      <b-col lg="2">
+        <b-button v-b-modal.modal-time class="add-button">Add New Entry</b-button>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col lg="12">
+        <b-table striped hover :items="entries" :fields="fields">
+          <template v-slot:cell(client)="data">
+            <b-link :href="`/#/client/${data.value}`">{{  clients.filter(client => client.id == data.value)[0].name }}</b-link>
+          </template>
+
+          <template v-slot:cell(project_name)="data">
+            {{  projects.filter(project => project.id == data.item.project)[0].name }}
+          </template>
+
+          <template v-slot:cell(project_job_code)="data">
+            {{  projects.filter(project => project.id == data.item.project)[0].job_code }}
+          </template>
+
+        </b-table>
+      </b-col>
+    </b-row>
+
+    <b-modal id="modal-time" ref="modal-time" centered>
+      <template v-slot:modal-title>
+        Add a Time Entry
+      </template>
+      <b-form>
+        <b-form-group id="input-group-time_date" label="Date:" label-for="time_date">
+          <b-form-datepicker id="time_date" v-model="date" class="mb-2"></b-form-datepicker> 
+        </b-form-group>
+        <b-form-group id="time_time_spent" label="Time Spent:" label-for="time_time_spent">
+          <b-form-spinbutton id="time_time_spent" v-model="time_spent" min="15" max="100000" step="15"></b-form-spinbutton>
+        </b-form-group>
+        <b-form-group id="time_note" label="Note:" label-for="time_note">
+          <b-input
+            id="time_note"
+            class="mb-2 mr-sm-2 mb-sm-0"
+            placeholder="Enter note here..."
+            v-model="note"
+          ></b-input>
+        </b-form-group>
+        <b-form-group id="input-group-project_client" label="Client:" label-for="project_client">
+          <b-form-select
+            id="project_client"
+            class="mb-2 mr-sm-2 mb-sm-0"
+            :options="client_options"
+            v-model="client"
+            :value="null"
+          ></b-form-select>
+        </b-form-group>
+        <b-form-group id="input-group-project_client" label="Project:" label-for="project_client">
+          <b-form-select
+            id="project_client"
+            class="mb-2 mr-sm-2 mb-sm-0"
+            :options="project_options"
+            v-model="project"
+            :value="null"
+          ></b-form-select>
+        </b-form-group>
+      </b-form>
+      <template v-slot:modal-footer>
+        <b-button variant="secondary" @click="hideModal()">
+          Cancel
+        </b-button>
+        <b-button variant="primary" @click="add()">Save</b-button>
+      </template>
+    </b-modal>
+  </div>
+</template>
+
+<script>
+
+import { uuid } from 'vue-idb'
+
+export default {
+  name: 'SingleProject',
+  data () {
+    return {
+      fields: [
+        {
+          key: 'client',
+          label: 'Client',
+          sortable: true
+        },
+        {
+          key: 'project_name',
+          label: 'Project Name',
+          sortable: true
+        },
+        {
+          key: 'project_job_code',
+          label: 'Job Code',
+          sortable: true
+        },
+        {
+          key: 'date',
+          label: 'Date',
+          sortable: true
+        },
+        {
+          key: 'time_spent',
+          label: 'Time',
+          sortable: true
+        },
+      ],
+      entries: [],
+      clients: [],
+      client_options: [],
+      projects: [],
+      project_options: [],
+      time_spent: null,
+      date: null,
+      note: null,
+      submitted: false,
+      reminder: false,
+      client: null,
+      project: null
+    }
+  },
+  mounted () {
+    this.getClients();
+    this.getProjects();
+    this.update();
+  },
+  watch: {
+    clients () {
+      for (let i = 0; i < this.clients.length; i++) {
+        this.client_options.push({value: this.clients[i].id, text: this.clients[i].name})
+      }
+    },
+    projects () {
+      for (let i = 0; i < this.projects.length; i++) {
+        this.project_options.push({value: this.projects[i].id, text: `${this.projects[i].job_code} - ${this.projects[i].name}`})
+      }
+    }
+  },
+  methods: {
+    update(){
+      this.$db.entries.where('project').equals(this.$route.params.id).toArray().then( entries => this.entries = entries )
+    },
+    add (){
+      this.$db.entries.add({ 
+        id: uuid(),
+        time_spent: this.time_spent,
+        date: this.date,
+        note: this.note,
+        client: this.client,
+        project: this.project,
+        submitted: this.submitted,
+        reminder: this.reminder
+      }).then(() => this.update())
+    },
+    remove (entry){
+      this.$db.entries.where('id').equals(entry.id).delete().then(() => this.update())
+    },
+    hideModal() {
+      this.$refs['modal-time'].hide()
+    },
+    getClients(){
+      this.$db.clients.toArray().then( clients => this.clients = clients )
+    },
+    getProjects(){
+      this.$db.projects.toArray().then( projects => this.projects = projects )
+    },
+  }
+}
+</script>
