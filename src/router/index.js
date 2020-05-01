@@ -11,8 +11,8 @@ Vue.use(VueRouter)
   const routes = [
   {
     path: '/',
-    name: 'Dashboard',
-    component: Dashboard
+    name: 'Time',
+    component: Time
   },
   {
     path: '/time',
