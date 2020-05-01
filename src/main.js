@@ -8,6 +8,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUserSecret } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import JsonCSV from 'vue-json-csv'
+import VueCharts from 'vue-chartjs'
+
+ 
+Vue.component('downloadCsv', JsonCSV)
 
 library.add(faUserSecret)
 Vue.component('font-awesome-icon', FontAwesomeIcon)

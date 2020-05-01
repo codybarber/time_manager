@@ -6,20 +6,31 @@
         Dashboard
       </b-col>
     </b-row>
+    <b-row>
+      <b-col lg="12">
+        <!-- <line-chart
+          v-if="loaded"
+          :chartdata="chartdata"
+          :options="options"/> -->
+      </b-col>
+    </b-row>
   </div>
 </template>
 
 <script>
 
 import { uuid } from 'vue-idb'
+import LineChart from '../components/line_chart.vue'
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
   name: 'Dashboard',
+  components: {LineChart},
   data () {
     return {
       entries: [],
+      updated_entries: [],
       clients: [],
       client_options: [],
       projects: [],
@@ -30,13 +41,15 @@ export default {
       submitted: false,
       reminder: false,
       client: null,
-      project: null
+      project: null,
+      loaded: false,
+      chartdata: null
     }
   },
   mounted () {
-    this.update();
     this.getClients();
     this.getProjects();
+    this.update();
   },
   watch: {
     clients () {
@@ -48,11 +61,32 @@ export default {
       for (let i = 0; i < this.projects.length; i++) {
         this.project_options.push({value: this.projects[i].id, text: `${this.projects[i].job_code} - ${this.projects[i].name}`})
       }
+    },
+    entries () {
+      this.updated_entries = [];
+      let self = this;
+      this.chartdata = {
+        label: 'Time',
+        data: [20, 10, 50, 20]
+      }
+      // this.entries.forEach(function (value) {
+      //   self.chartdata.push({
+      //     client_id: value.client,
+      //     client: self.clients.filter(client => client.id == value.client)[0].name,
+      //     project_name: self.projects.filter(project => project.id == value.project)[0].name,
+      //     project_id: value.project,
+      //     project_job_code: self.projects.filter(project => project.id == value.project)[0].job_code,
+      //     date: value.date,
+      //     time_spent:  value.time_spent
+      //   })
+      // });
     }
   },
   methods: {
     update(){
       this.$db.entries.toArray().then( entries => this.entries = entries )
+      this.chartdata = this.entries;
+      this.loaded = true;
     },
     add (){
       this.$db.entries.add({ 

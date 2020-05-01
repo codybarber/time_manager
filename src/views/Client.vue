@@ -11,17 +11,19 @@
     </b-row>
     <b-row>
       <b-col lg="3" md="6" sm="12" v-for="(client, index) in clients" :key="index">
-        <b-card :title="client.name">
-          <hr>
-          <span class="pull-right">
-            <b-btn variant="secondary-outline" @click="remove(client)">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-            </b-btn>
-            <b-btn variant="secondary-outline" @click="edit(client)">
-              <i class="fa fa-pencil" aria-hidden="true"></i>
-            </b-btn>
-          </span>
-        </b-card>
+        <b-link :href="`/#/client/${client.id}`" class="card-link">
+          <b-card :title="client.name">
+            <hr>
+            <span class="pull-right">
+              <b-btn variant="secondary-outline" @click="remove(client)">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </b-btn>
+              <b-btn variant="secondary-outline" @click="edit(client)">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </b-btn>
+            </span>
+          </b-card>
+        </b-link>
       </b-col>
     </b-row>
 
@@ -84,3 +86,22 @@ export default {
   }
 }
 </script>
+<style>
+.card-link {
+  color: black;
+}
+.card-link:hover {
+  color: #05668D;
+}
+
+.add-button {
+  background-color: #05668D !important;
+  border-color: #427AA1 !important;
+  color: white !important;
+}
+.add-button:hover {
+  background-color: #427AA1 !important;
+  border-color: #427AA1 !important;
+  color: white !important;
+}
+</style>

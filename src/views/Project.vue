@@ -40,30 +40,39 @@
       </template>
     </b-modal>
     <b-row class="sub-header-row">
-      <b-col lg="10">
+      <b-col lg="5">
         <span class="sub-header">Projects</span>
+      </b-col>
+      <b-col lg="3">
+        <b-input
+          id="filter"
+          class="mb-2 mr-sm-2 mb-sm-0"
+          placeholder="Search table here..."
+          v-model="filter"
+        ></b-input>
+      </b-col>
+      <b-col lg="2" class="text-right">
+        <download-csv
+          class= "btn btn-outline-secondary"
+          :data= "updated_projects"
+          name="projects.csv">
+          Download CSV
+        </download-csv>
       </b-col>
       <b-col lg="2">
         <b-button v-b-modal.modal-project class="add-button">Add New Project</b-button>
       </b-col>
     </b-row>
     <b-row>
-      <b-col lg="3" md="6" sm="12" v-for="(project, index) in projects" :key="index">
-        <b-card :sub-title="project.name">
-          <hr>
-          <b-card-text>
-            <b>Job Code:</b> {{ project.job_code }}<br>
-            <b>Client:</b> {{ clients.filter(client => client.id == project.client)[0].name }}
-          </b-card-text>
-          <span class="pull-right">
-            <b-btn variant="secondary-outline" @click="remove(project)">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-            </b-btn>
-            <b-btn variant="secondary-outline" @click="edit(project)">
-              <i class="fa fa-pencil" aria-hidden="true"></i>
-            </b-btn>
-          </span>
-        </b-card>
+      <b-col lg="12">
+        <b-table striped hover :filter="filter" :items="updated_projects" :fields="fields">
+          <template v-slot:cell(client)="data">
+            <b-link :href="`/#/client/${data.item.client_id}`">{{ data.item.client }}</b-link>
+          </template>
+          <template v-slot:cell(name)="data">
+            <b-link :href="`/#/project/${data.item.id}`">{{ data.item.name }}</b-link>
+          </template>
+        </b-table>
       </b-col>
     </b-row>
   </div>
@@ -80,9 +89,28 @@ export default {
       clients: [],
       client_options: [],
       projects: [],
+      updated_projects: [],
       project_name: null,
       project_client: null,
-      project_jobcode: null
+      project_jobcode: null,
+      fields: [
+        {
+          key: 'client',
+          label: 'Client',
+          sortable: true
+        },
+        {
+          key: 'name',
+          label: 'Project Name',
+          sortable: true
+        },
+        {
+          key: 'job_code',
+          label: 'Job Code',
+          sortable: true
+        },
+      ],
+      filter: ''
     }
   },
   mounted () {
@@ -94,6 +122,19 @@ export default {
       for (let i = 0; i < this.clients.length; i++) {
         this.client_options.push({value: this.clients[i].id, text: this.clients[i].name})
       }
+    },
+    projects () {
+      this.updated_projects = [];
+      let self = this;
+      this.projects.forEach(function (value) {
+        self.updated_projects.push({
+          client_id: value.client,
+          client: self.clients.filter(client => client.id == value.client)[0].name,
+          id: value.id,
+          name: value.name,
+          job_code: value.job_code
+        })
+      });
     }
   },
   methods: {
@@ -136,12 +177,13 @@ i:hover {
 }
 
 .add-button {
-  background-color: #CED0CE !important;
-  border-color: #CED0CE !important;
-  color: #191919 !important;
+  background-color: #05668D !important;
+  border-color: #05668D !important;
+  color: white !important;
 }
-
 .add-button:hover {
-  color: #F15025 !important;
+  background-color: #427AA1 !important;
+  border-color: #427AA1 !important;
+  color: white !important;
 }
 </style>

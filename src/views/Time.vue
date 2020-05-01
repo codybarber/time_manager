@@ -2,8 +2,24 @@
 <template>
   <div class="container-fluid">
     <b-row class="sub-header-row">
-      <b-col lg="10">
+      <b-col lg="5">
         <span class="sub-header">Time</span>
+      </b-col>
+      <b-col lg="3" class="">
+        <b-input
+          id="filter"
+          class="mb-2 mr-sm-2 mb-sm-0"
+          placeholder="Search table here..."
+          v-model="filter"
+        ></b-input>
+      </b-col>
+      <b-col lg="2" class="text-right">
+        <download-csv
+          class= "btn btn-outline-secondary"
+          :data= "updated_entries"
+          name="time.csv">
+          Download CSV
+        </download-csv>
       </b-col>
       <b-col lg="2">
         <b-button v-b-modal.modal-time class="add-button">Add New Entry</b-button>
@@ -11,17 +27,17 @@
     </b-row>
     <b-row>
       <b-col lg="12">
-        <b-table striped hover :items="entries" :fields="fields">
+        <b-table striped hover :filter="filter" :items="updated_entries" :fields="fields">
           <template v-slot:cell(client)="data">
-            <b-link :href="`/#/client/${data.value}`">{{  clients.filter(client => client.id == data.value)[0].name }}</b-link>
+            <b-link :href="`/#/client/${data.item.client_id}`">{{ data.item.client }}</b-link>
           </template>
 
           <template v-slot:cell(project_name)="data">
-            <b-link :href="`/#/project/${data.item.project}`">{{  projects.filter(project => project.id == data.item.project)[0].name }}</b-link>
+            <b-link :href="`/#/project/${data.item.project_id}`">{{ data.item.project_name }}</b-link>
           </template>
 
           <template v-slot:cell(project_job_code)="data">
-            <b-link :href="`/#/project/${data.item.project}`">{{  projects.filter(project => project.id == data.item.project)[0].job_code }}</b-link>
+            <b-link :href="`/#/project/${data.item.project_id}`">{{ data.item.project_job_code }}</b-link>
           </template>
 
         </b-table>
@@ -110,8 +126,14 @@ export default {
           label: 'Time',
           sortable: true
         },
+        {
+          key: 'note',
+          label: 'Note',
+          sortable: true
+        },
       ],
       entries: [],
+      updated_entries: [],
       clients: [],
       client_options: [],
       projects: [],
@@ -122,13 +144,14 @@ export default {
       submitted: false,
       reminder: false,
       client: null,
-      project: null
+      project: null,
+      filter: ''
     }
   },
   mounted () {
-    this.update();
     this.getClients();
     this.getProjects();
+    this.update();
   },
   watch: {
     clients () {
@@ -140,6 +163,22 @@ export default {
       for (let i = 0; i < this.projects.length; i++) {
         this.project_options.push({value: this.projects[i].id, text: `${this.projects[i].job_code} - ${this.projects[i].name}`})
       }
+    },
+    entries () {
+      this.updated_entries = [];
+      let self = this;
+      this.entries.forEach(function (value) {
+        self.updated_entries.push({
+          client_id: value.client,
+          client: self.clients.filter(client => client.id == value.client)[0].name,
+          project_name: self.projects.filter(project => project.id == value.project)[0].name,
+          project_id: value.project,
+          project_job_code: self.projects.filter(project => project.id == value.project)[0].job_code,
+          date: value.date,
+          time_spent:  value.time_spent,
+          note: value.note
+        })
+      });
     }
   },
   methods: {
@@ -173,3 +212,15 @@ export default {
   }
 }
 </script>
+<style>
+.add-button {
+  background-color: #05668D !important;
+  border-color: #05668D !important;
+  color: white !important;
+}
+.add-button:hover {
+  background-color: #427AA1 !important;
+  border-color: #427AA1 !important;
+  color: white !important;
+}
+</style>
